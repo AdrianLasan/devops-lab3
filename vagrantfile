@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "archlinux/archlinux"
+  
+  # Port forwarding to allow access to the Flask app
+  config.vm.network "forwarded_port", guest: 5000, host: 8080
+  
+  # Upload hello.py to the VM
+  config.vm.provision "file", source: "hello.py", destination: "/home/vagrant/hello.py"
+  
+  # Install packages and run the Flask app using shell provisioner
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo pacman -Syu git nano vim python python-virtualenv python-pip --noconfirm
+    python -m venv flask_venv
+    source flask_venv/bin/activate
+    pip install Flask
+    flask --app /home/vagrant/hello run --host=0.0.0.0
+  SHELL
+end
